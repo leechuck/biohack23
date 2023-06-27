@@ -21,16 +21,31 @@ new File("data/E-MTAB-5214-query-results.fpkms.tsv").splitEachLine("\t") { line 
 	    lmap[v] = k
 	}
     }
+}
+def fmap = [:]
+(2..54).each { k ->
+    def fname = lmap[k]
+    fname = fname.replaceAll(" ","_").replaceAll("\\(","").replaceAll("\\)","")
+    def fout = new PrintWriter(new FileWriter("enrichment/"+fname+".txt"))
+    fmap[k] = fout
+}
+new File("data/E-MTAB-5214-query-results.fpkms.tsv").splitEachLine("\t") { line ->
     if (line[0].startsWith('ENS')) {
 	def geneid = map[line[0]]
-	def spinal = line[8]
-	if (!spinal || spinal.length()==0)
-	    spinal = 0
-	if (geneid) {
-	    gmap[geneid].each { pheno ->
-		println "GENE_$geneid\t$pheno\t$spinal"
+	(2..54).each { k ->
+	    def fout = fmap[k]
+	    def spinal = line[k]
+	    if (!spinal || spinal.length()==0)
+		spinal = 0
+	    if (geneid) {
+		gmap[geneid].each { pheno ->
+		    fout.println("GENE_$geneid\t$pheno\t$spinal")
+		}
 	    }
 	}
     }
 }
-println lmap
+fmap.each { k, v ->
+    v.flush()
+    v.close()
+}

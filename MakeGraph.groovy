@@ -48,3 +48,12 @@ new File("data/hsa_MTI_ENSEMBLE.csv").splitEachLine("\t") { line ->
 	}
     }
 }
+
+first = true
+new File("data/rhea-inputs.txt").splitEachLine(",") { line ->
+    if (first)
+	first = false
+    else {
+	
+    }
+}

@@ -16,8 +16,10 @@ new File("data/E-MTAB-5214-query-results.fpkms.tsv").splitEachLine("\t") { line 
 	(2..54).each { k ->
 	    // works only if "transcript" is actually a gene identifier, otherwise URL is wrong :(
 	    def val = line[k]
-	    def urlfrag = java.net.URLEncoder.encode(idxmap[k], "UTF-8")
-	    println "<http://rdf.ebi.ac.uk/resource/ensembl/$transcript> <http://2023.biohackathon.org/datatypes#expression_value> \"$val\"^^<http://www.w3.org/2001/XMLSchema#double> <http://2023.biohackathon.org/graph/$urlfrag> ."
+	    if (val && val.length()>0) {
+		def urlfrag = java.net.URLEncoder.encode(idxmap[k], "UTF-8")
+		println "<http://rdf.ebi.ac.uk/resource/ensembl/$transcript> <http://2023.biohackathon.org/datatypes#expression_value> \"$val\"^^<http://www.w3.org/2001/XMLSchema#double> <http://2023.biohackathon.org/graph/$urlfrag> ."
+	    }
 	}
     }
 }

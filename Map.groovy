@@ -1,3 +1,8 @@
+@Grab(group='colt', module='colt', version='1.2.0')
+
+import cern.colt.list.*
+import cern.jet.stat.Descriptive
+
 def map = [:] // ensg to gene id and inverse
 new File("data/custom").splitEachLine("\t") { line ->
     def ncbi = line[4]
@@ -32,14 +37,29 @@ def fmap = [:]
 new File("data/E-MTAB-5214-query-results.fpkms.tsv").splitEachLine("\t") { line ->
     if (line[0].startsWith('ENS')) {
 	def geneid = map[line[0]]
+	def distribution = new DoubleArrayList()
+	(2..54).each { k ->
+	    def spinal = line[k]
+	    if (!spinal || spinal.length()==0)
+		spinal = 0
+	    else
+		spinal = new Double(spinal)
+	    distribution.add(spinal)
+	}
+	def mean = Descriptive.mean(distribution)
+	def sigma = Descriptive.standardDeviation(Descriptive.variance(distribution.size(), Descriptive.sum(distribution), Descriptive.sumOfSquares(distribution)))
 	(2..54).each { k ->
 	    def fout = fmap[k]
 	    def spinal = line[k]
 	    if (!spinal || spinal.length()==0)
 		spinal = 0
+	    else
+		spinal = new Double(spinal)
+	    def val = mean - spinal // difference from mean
+	    val = val / sigma // difference expressed in std deviations
 	    if (geneid) {
 		gmap[geneid].each { pheno ->
-		    fout.println("GENE_$geneid\t$pheno\t$spinal")
+		    fout.println("GENE_$geneid\t$pheno\t$val")
 		}
 	    }
 	}
